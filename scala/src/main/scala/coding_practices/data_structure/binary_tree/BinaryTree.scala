@@ -39,7 +39,7 @@ trait BinaryTree[T] {
 
   def add(value: T): BinaryTree[T]
 
-  def find(value: T): Option[Node[T]]
+  def find(value: T): Option[T]
 
   def remove(value: T): BinaryTree[T]
 
@@ -82,15 +82,15 @@ class BinaryTreeImpl[T]()(
     }
   }
 
-  override def find(value: T): Option[Node[T]] = {
-    root.flatMap(find(value, _))
-  }
+  override def find(value: T): Option[T] = findNode(value).map(_.value)
 
-  private def find(value: T, node: Node[T]): Option[Node[T]] = {
+  private def findNode(value: T): Option[Node[T]] = root.flatMap(findNode(value, _))
+
+  private def findNode(value: T, node: Node[T]): Option[Node[T]] = {
     if (value == node.value) {
       Some(node)
     } else {
-      node.getLeftNode.flatMap(find(value, _)).orElse(node.getRightNode.flatMap(find(value, _)))
+      node.getLeftNode.flatMap(findNode(value, _)).orElse(node.getRightNode.flatMap(findNode(value, _)))
     }
   }
 

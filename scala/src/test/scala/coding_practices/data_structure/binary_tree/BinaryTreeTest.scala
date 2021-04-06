@@ -1,15 +1,17 @@
 package coding_practices.data_structure.binary_tree
 
-import coding_practices.data_structure.binary_tree
 import coding_practices.model.Dinosaur
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.{OneInstancePerTest, OptionValues}
+import org.scalatest.{OneInstancePerTest, OptionValues, PrivateMethodTester}
 
 class BinaryTreeTest extends AnyFunSpec
   with OneInstancePerTest
   with Matchers
-  with OptionValues {
+  with OptionValues
+  with PrivateMethodTester {
+
+  val findNode: PrivateMethod[Option[Node[Dinosaur]]] = PrivateMethod('findNode)
 
   describe("BinaryTree") {
     val dinosaurCustomOrdering: Ordering[Dinosaur] = (x: Dinosaur, y: Dinosaur) => {
@@ -34,7 +36,7 @@ class BinaryTreeTest extends AnyFunSpec
     it("should add node correctly") {
       dinosaurs.foreach(binaryTree.add)
 
-      val foundDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(binaryTree.find).map(_.value)
+      val foundDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(binaryTree.find)
 
       foundDinosaurs should contain theSameElementsAs dinosaurs
     }
@@ -43,7 +45,7 @@ class BinaryTreeTest extends AnyFunSpec
       dinosaurs.foreach(binaryTree.add)
       binaryTree.remove(paul)
 
-      val foundDinosaur: Option[Dinosaur] = binaryTree.find(paul).map(_.value)
+      val foundDinosaur: Option[Dinosaur] = binaryTree.find(paul)
 
       foundDinosaur shouldBe empty
     }
@@ -52,9 +54,9 @@ class BinaryTreeTest extends AnyFunSpec
       dinosaurs.foreach(binaryTree.add)
       binaryTree.remove(paul)
 
-      val nodeOpt: Option[binary_tree.Node[Dinosaur]] = binaryTree.find(john)
-      val leftNodeOpt: Option[binary_tree.Node[Dinosaur]] = nodeOpt.flatMap(_.getLeftNode)
-      val rightNodeOpt: Option[binary_tree.Node[Dinosaur]] = nodeOpt.flatMap(_.getRightNode)
+      val nodeOpt: Option[Node[Dinosaur]] = binaryTree invokePrivate findNode(john)
+      val leftNodeOpt: Option[Node[Dinosaur]] = nodeOpt.flatMap(_.getLeftNode)
+      val rightNodeOpt: Option[Node[Dinosaur]] = nodeOpt.flatMap(_.getRightNode)
 
       val dinosaurOpt: Option[Dinosaur] = nodeOpt.map(_.value)
       val leftDinosaurOpt: Option[Dinosaur] = leftNodeOpt.map(_.value)

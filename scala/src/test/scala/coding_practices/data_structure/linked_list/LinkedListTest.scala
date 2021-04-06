@@ -3,12 +3,15 @@ package coding_practices.data_structure.linked_list
 import coding_practices.model.Dinosaur
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.{OneInstancePerTest, OptionValues}
+import org.scalatest.{OneInstancePerTest, OptionValues, PrivateMethodTester}
 
 class LinkedListTest extends AnyFunSpec
   with OneInstancePerTest
   with Matchers
-  with OptionValues {
+  with OptionValues
+  with PrivateMethodTester {
+
+  val findNode: PrivateMethod[Option[Node[Dinosaur]]] = PrivateMethod('findNode)
 
   describe("LinkedList") {
     val linkedList: LinkedList[Dinosaur] = new LinkedListImpl[Dinosaur]()
@@ -26,7 +29,7 @@ class LinkedListTest extends AnyFunSpec
     it("should add node correctly") {
       dinosaurs.foreach(linkedList.add)
 
-      val foundDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(linkedList.find).map(_.value)
+      val foundDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(linkedList.find)
 
       foundDinosaurs should contain theSameElementsAs dinosaurs
     }
@@ -35,7 +38,7 @@ class LinkedListTest extends AnyFunSpec
       dinosaurs.foreach(linkedList.add)
       linkedList.remove(paul)
 
-      val foundDinosaur: Option[Dinosaur] = linkedList.find(paul).map(_.value)
+      val foundDinosaur: Option[Dinosaur] = linkedList.find(paul)
 
       foundDinosaur shouldBe empty
     }
@@ -44,7 +47,7 @@ class LinkedListTest extends AnyFunSpec
       dinosaurs.foreach(linkedList.add)
       linkedList.remove(paul)
 
-      val nodeOpt: Option[Node[Dinosaur]] = linkedList.find(jack)
+      val nodeOpt: Option[Node[Dinosaur]] = linkedList invokePrivate findNode(jack)
       val dinosaurOpt: Option[Dinosaur] = nodeOpt.map(_.value)
 
       val nextNodeOpt: Option[Node[Dinosaur]] = nodeOpt.flatMap(_.getNextNode)

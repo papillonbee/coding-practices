@@ -17,9 +17,11 @@ trait LinkedList[T] {
 
   def add(value: T): LinkedList[T]
 
-  def find(value: T): Option[Node[T]]
+  def find(value: T): Option[T]
 
   def remove(value: T): LinkedList[T]
+
+  def map[R](f: T => R): LinkedList[R]
 
   def traverse[A](f: Node[T] => A): Unit
 }
@@ -32,13 +34,15 @@ class LinkedListImpl[T]() extends LinkedList[T] {
     this
   }
 
-  override def find(value: T): Option[Node[T]] = head.flatMap(find(value, _))
+  override def find(value: T): Option[T] = findNode(value).map(_.value)
 
-  private def find(value: T, node: Node[T]): Option[Node[T]] = {
+  private def findNode(value: T): Option[Node[T]] = head.flatMap(findNode(value, _))
+
+  private def findNode(value: T, node: Node[T]): Option[Node[T]] = {
     if (value == node.value) {
       Some(node)
     } else {
-      node.getNextNode.flatMap(find(value, _))
+      node.getNextNode.flatMap(findNode(value, _))
     }
   }
 
@@ -60,6 +64,22 @@ class LinkedListImpl[T]() extends LinkedList[T] {
         node.setNextNode(nextNode.getNextNode)
       case _ =>
         node.getNextNode.foreach(remove(value, _))
+    }
+  }
+
+  override def map[R](f: T => R): LinkedList[R] = {
+    val emptyLinkedList: LinkedList[R] = new LinkedListImpl[R]()
+
+    head.map(recursivelyMap(_, emptyLinkedList)(f)).getOrElse(emptyLinkedList)
+  }
+
+  private def recursivelyMap[R](node: Node[T], linkedList: LinkedList[R])(f: T => R): LinkedList[R] = {
+    val updatedLinkedList: LinkedList[R] = linkedList.add(f(node.value))
+    node.getNextNode match {
+      case Some(nextNode) =>
+        recursivelyMap(nextNode, updatedLinkedList)(f)
+      case _ =>
+        updatedLinkedList
     }
   }
 
