@@ -1,11 +1,11 @@
-name := "coding-practices"
+name := "scala"
 
 version := "0.1"
 
 scalaVersion := "2.13.5"
 
 val projectName = "papan"
-val serviceName = "coding-practices"
+val serviceName = "scala"
 
 lazy val root = (project in file("."))
   .settings(
