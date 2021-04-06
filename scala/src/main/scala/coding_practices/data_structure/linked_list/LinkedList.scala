@@ -19,6 +19,8 @@ trait LinkedList[T] {
 
   def find(value: T): Option[T]
 
+  def findBy(f: T => Boolean): Option[T]
+
   def remove(value: T): LinkedList[T]
 
   def map[R](f: T => R): LinkedList[R]
@@ -43,6 +45,18 @@ class LinkedListImpl[T]() extends LinkedList[T] {
       Some(node)
     } else {
       node.getNextNode.flatMap(findNode(value, _))
+    }
+  }
+
+  override def findBy(f: T => Boolean): Option[T] = findNodeBy(f).map(_.value)
+
+  private def findNodeBy(f: T => Boolean): Option[Node[T]] = head.flatMap(findNodeBy(f, _))
+
+  private def findNodeBy(f: T => Boolean, node: Node[T]): Option[Node[T]] = {
+    if (f(node.value)) {
+      Some(node)
+    } else {
+      node.getNextNode.flatMap(findNodeBy(f, _))
     }
   }
 
