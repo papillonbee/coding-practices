@@ -20,4 +20,8 @@ object Generator {
   def double: Generator[Double] = new Generator[Double] {
     override def build: Double = Random.nextDouble()
   }
+
+  def alphanumeric: Generator[String] = new Generator[String] {
+    override def build: String = Random.alphanumeric.take(10).mkString
+  }
 }
