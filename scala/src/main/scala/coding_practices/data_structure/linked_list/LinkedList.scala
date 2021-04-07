@@ -1,5 +1,7 @@
 package coding_practices.data_structure.linked_list
 
+import scala.annotation.tailrec
+
 case class Node[T](
   value: T,
   private var nextNode: Option[Node[T]] = None,
@@ -25,14 +27,21 @@ trait LinkedList[T] {
 
   def map[R](f: T => R): LinkedList[R]
 
-  def traverse[A](f: Node[T] => A): Unit
+  def traverse[A](f: T => A): Unit
+
+  def isEmpty: Boolean
+
+  def size: Int
 }
 
 class LinkedListImpl[T]() extends LinkedList[T] {
+  var currentSize: Int = 0
+
   override def add(value: T): LinkedList[T] = {
     val currentNode: Node[T] = Node(value = value)
     currentNode.setNextNode(head)
     head = Some(currentNode)
+    currentSize = currentSize + 1
     this
   }
 
@@ -65,6 +74,7 @@ class LinkedListImpl[T]() extends LinkedList[T] {
       case Some(headNode) =>
         if (value == headNode.value) {
           head = headNode.getNextNode
+          currentSize = currentSize - 1
         } else {
           remove(value, headNode)
         }
@@ -76,6 +86,7 @@ class LinkedListImpl[T]() extends LinkedList[T] {
     node.getNextNode match {
       case Some(nextNode) if value == nextNode.value =>
         node.setNextNode(nextNode.getNextNode)
+        currentSize = currentSize - 1
       case _ =>
         node.getNextNode.foreach(remove(value, _))
     }
@@ -87,6 +98,7 @@ class LinkedListImpl[T]() extends LinkedList[T] {
     head.map(recursivelyMap(_, emptyLinkedList)(f)).getOrElse(emptyLinkedList)
   }
 
+  @tailrec
   private def recursivelyMap[R](node: Node[T], linkedList: LinkedList[R])(f: T => R): LinkedList[R] = {
     val updatedLinkedList: LinkedList[R] = linkedList.add(f(node.value))
     node.getNextNode match {
@@ -97,10 +109,19 @@ class LinkedListImpl[T]() extends LinkedList[T] {
     }
   }
 
-  override def traverse[A](f: Node[T] => A): Unit = head.foreach(recursivelyTraverse(_)(f))
+  override def traverse[A](f: T => A): Unit = recursivelyTraverse(head)(f)
 
-  private def recursivelyTraverse[A](node: Node[T])(f: Node[T] => A): Unit = {
-    f(node)
-    node.getNextNode.foreach(recursivelyTraverse(_)(f))
+  @tailrec
+  private def recursivelyTraverse[A](nodeOpt: Option[Node[T]])(f: T => A): Unit = {
+    nodeOpt match {
+      case Some(node: Node[T]) =>
+        f(node.value)
+        recursivelyTraverse(node.getNextNode)(f)
+      case _ =>
+    }
   }
+
+  override def isEmpty: Boolean = head.isEmpty
+
+  override def size: Int = currentSize
 }

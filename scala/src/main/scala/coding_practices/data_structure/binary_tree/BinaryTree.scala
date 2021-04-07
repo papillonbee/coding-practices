@@ -43,7 +43,7 @@ trait BinaryTree[T] {
 
   def remove(value: T): BinaryTree[T]
 
-  def traverse[A](f: Node[T] => A): Unit
+  def traverse[A](f: T => A): Unit
 }
 
 class BinaryTreeImpl[T]()(
@@ -152,12 +152,16 @@ class BinaryTreeImpl[T]()(
     }
   }
 
-  override def traverse[A](f: Node[T] => A): Unit = root.foreach(recursivelyTraverse(_)(f))
+  override def traverse[A](f: T => A): Unit = recursivelyTraverse(root)(f)
 
-  private def recursivelyTraverse[A](node: Node[T])(f: Node[T] => A): Unit = {
-    f(node)
-    node.getLeftNode.foreach(recursivelyTraverse(_)(f))
-    node.getRightNode.foreach(recursivelyTraverse(_)(f))
+  private def recursivelyTraverse[A](nodeOpt: Option[Node[T]])(f: T => A): Unit = {
+    nodeOpt match {
+      case Some(node: Node[T]) =>
+        f(node.value)
+        recursivelyTraverse(node.getLeftNode)(f)
+        recursivelyTraverse(node.getRightNode)(f)
+      case _ =>
+    }
   }
 }
 
