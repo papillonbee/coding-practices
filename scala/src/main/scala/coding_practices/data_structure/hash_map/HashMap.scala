@@ -40,7 +40,7 @@ class HashMapImpl[K, V]() extends HashMap[K, V] {
   override def get(key: K): Option[V] = {
     val hashedKey: Int = key.getHashValue(lookupTable.length)
     val linkedList: LinkedList[(K, V)] = lookupTable(hashedKey)
-    val keyValuePairOpt: Option[(K, V)] = linkedList.findBy(p => p._1 == key)
+    val keyValuePairOpt: Option[(K, V)] = linkedList.findBy(_._1 == key)
     val valueOpt: Option[V] = keyValuePairOpt.map(_._2)
 
     valueOpt
