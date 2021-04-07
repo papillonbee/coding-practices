@@ -30,6 +30,9 @@ class HashMapImpl[K, V]() extends HashMap[K, V] {
     if (linkedList.isEmpty) {
       occupiedIndices.add(hashedKey)
     }
+    get(key).map { existingValue: V =>
+      linkedList.remove((key, existingValue))
+    }
     linkedList.add((key, value))
 
     if (occupiedIndices.size.toDouble / lookupTable.length > loadFactor) resize()
