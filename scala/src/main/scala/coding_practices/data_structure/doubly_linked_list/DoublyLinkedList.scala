@@ -30,12 +30,14 @@ trait DoublyLinkedList[T] {
   def getFront: Option[T]
   def getBack: Option[T]
   def traverse[A](f: T => A): Unit
+  def size: Int
 }
 
 class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
 
   var head: Option[Node[T]] = None
   var tail: Option[Node[T]] = None
+  var currentSize: Int = 0
 
   override def pushFront(value: T): DoublyLinkedList[T] = {
     val currentNode: Node[T] = Node(value = value)
@@ -45,6 +47,7 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
       tail = Some(currentNode)
     }
     head = Some(currentNode)
+    currentSize = currentSize + 1
     this
   }
 
@@ -56,26 +59,41 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
       head = Some(currentNode)
     }
     tail = Some(currentNode)
+    currentSize = currentSize + 1
     this
   }
 
   override def popFront(): DoublyLinkedList[T] = {
-    val nextNodeOpt: Option[Node[T]] = head.flatMap(_.getNextNode)
-    nextNodeOpt.foreach(_.setPreviousNode(None))
-    head = nextNodeOpt
+    head match {
+      case Some(headNode: Node[T]) =>
+        val nextNodeOpt: Option[Node[T]] = headNode.getNextNode
+        nextNodeOpt.foreach(_.setPreviousNode(None))
+        head = nextNodeOpt
+        currentSize = currentSize - 1
+      case _ =>
+    }
+
     if (head.isEmpty) {
       tail = None
     }
+
     this
   }
 
   override def popBack(): DoublyLinkedList[T] = {
-    val previousNodeOpt: Option[Node[T]] = tail.flatMap(_.getPreviousNode)
-    previousNodeOpt.foreach(_.setNextNode(None))
-    tail = previousNodeOpt
+    tail match {
+      case Some(tailNode: Node[T]) =>
+        val previousNodeOpt: Option[Node[T]] = tailNode.getPreviousNode
+        previousNodeOpt.foreach(_.setNextNode(None))
+        tail = previousNodeOpt
+        currentSize = currentSize - 1
+      case _ =>
+    }
+
     if (tail.isEmpty) {
       head = None
     }
+
     this
   }
 
@@ -94,4 +112,6 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
       case _ =>
     }
   }
+
+  override def size: Int = currentSize
 }
