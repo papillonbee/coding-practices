@@ -33,7 +33,7 @@ class BinaryTreeTest extends AnyFunSpec
       john2,
     )
 
-    it("should add node correctly") {
+    it("should add element correctly") {
       dinosaurs.foreach(binaryTree.add)
 
       val foundDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(binaryTree.find)
@@ -41,7 +41,7 @@ class BinaryTreeTest extends AnyFunSpec
       foundDinosaurs should contain theSameElementsAs dinosaurs
     }
 
-    it("should remove node correctly") {
+    it("should remove element correctly") {
       dinosaurs.foreach(binaryTree.add)
       binaryTree.remove(paul)
 
@@ -50,7 +50,7 @@ class BinaryTreeTest extends AnyFunSpec
       foundDinosaur shouldBe empty
     }
 
-    it("should store nodes correctly") {
+    it("should store elements correctly") {
       dinosaurs.foreach(binaryTree.add)
       binaryTree.remove(paul)
 

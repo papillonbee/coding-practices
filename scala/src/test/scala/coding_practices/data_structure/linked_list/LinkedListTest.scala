@@ -26,7 +26,7 @@ class LinkedListTest extends AnyFunSpec
       jack,
     )
 
-    it("should add node correctly") {
+    it("should add element correctly") {
       dinosaurs.foreach(linkedList.add)
 
       val foundDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(linkedList.find)
@@ -34,7 +34,7 @@ class LinkedListTest extends AnyFunSpec
       foundDinosaurs should contain theSameElementsAs dinosaurs
     }
 
-    it("should remove node correctly") {
+    it("should remove element correctly") {
       dinosaurs.foreach(linkedList.add)
       linkedList.remove(paul)
 
@@ -43,7 +43,7 @@ class LinkedListTest extends AnyFunSpec
       foundDinosaur shouldBe empty
     }
 
-    it("should store nodes correctly") {
+    it("should store elements correctly") {
       dinosaurs.foreach(linkedList.add)
       linkedList.remove(paul)
 

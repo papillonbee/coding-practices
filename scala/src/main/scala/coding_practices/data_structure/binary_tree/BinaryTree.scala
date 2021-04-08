@@ -35,7 +35,6 @@ case class Node[T](
 }
 
 trait BinaryTree[T] {
-  protected var root: Option[Node[T]] = None
 
   def add(value: T): BinaryTree[T]
 
@@ -51,6 +50,8 @@ class BinaryTreeImpl[T]()(
 ) extends BinaryTree[T] {
 
   import ord.mkOrderingOps
+
+  var root: Option[Node[T]] = None
 
   override def add(value: T): BinaryTree[T] = {
     val currentNode: Node[T] = Node(value = value)

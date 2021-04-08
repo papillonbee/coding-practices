@@ -15,7 +15,6 @@ case class Node[T](
 }
 
 trait LinkedList[T] {
-  protected var head: Option[Node[T]] = None
 
   def add(value: T): LinkedList[T]
 
@@ -35,6 +34,8 @@ trait LinkedList[T] {
 }
 
 class LinkedListImpl[T]() extends LinkedList[T] {
+
+  var head: Option[Node[T]] = None
   var currentSize: Int = 0
 
   override def add(value: T): LinkedList[T] = {
