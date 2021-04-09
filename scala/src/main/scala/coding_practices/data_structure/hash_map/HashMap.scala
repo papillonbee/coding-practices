@@ -1,6 +1,6 @@
 package coding_practices.data_structure.hash_map
 
-import coding_practices.data_structure.linked_list.{LinkedList, LinkedListImpl}
+import coding_practices.data_structure.doubly_linked_list.{DoublyLinkedList, DoublyLinkedListImpl, Node}
 
 case class Key[K](key: K) {
   def getHashValue(lookupTableSize: Int): Int = {
@@ -8,82 +8,109 @@ case class Key[K](key: K) {
   }
 }
 
+case class Record[K, V](
+  key: K,
+  value: V,
+  hashedKeyNode: Node[Int],
+)
+
 trait HashMap[K, V] {
   def put(key: K, value: V): HashMap[K, V]
   def get(key: K): Option[V]
-  def remove(key: K): HashMap[K, V]
+  def remove(key: K): Option[V]
+  def size: Int
 }
 
 class HashMapImpl[K, V]() extends HashMap[K, V] {
 
   val loadFactor: Double = 0.7
-  var occupiedAtLeastOnceIndices: LinkedList[Int] = new LinkedListImpl[Int]()
-  var lookupTable: Array[LinkedList[(K, V)]] = Array.fill[LinkedList[(K, V)]](1) {
-    new LinkedListImpl[(K, V)]()
+  var occupiedIndices: DoublyLinkedList[Int] = new DoublyLinkedListImpl[Int]()
+  var lookupTable: Array[DoublyLinkedList[Record[K, V]]] = Array.fill[DoublyLinkedList[Record[K, V]]](1) {
+    new DoublyLinkedListImpl[Record[K, V]]()
   }
+  var currentSize: Int = 0
 
   implicit def toKey(key: K): Key[K] = Key(key = key)
 
   override def put(key: K, value: V): HashMap[K, V] = {
     val hashedKey: Int = key.getHashValue(lookupTable.length)
-    val linkedList: LinkedList[(K, V)] = lookupTable(hashedKey)
+    val hashedKeyNode: Node[Int] = Node(hashedKey)
+    val doublyLinkedList: DoublyLinkedList[Record[K, V]] = lookupTable(hashedKey)
 
-    if (linkedList.isEmpty) {
-      occupiedAtLeastOnceIndices.add(hashedKey)
+    getNode(key) match {
+      case Some(existingRecordNode: Node[Record[K, V]]) =>
+        doublyLinkedList.removeNode(existingRecordNode)
+        doublyLinkedList.pushBack(Record(key, value, existingRecordNode.value.hashedKeyNode))
+      case _ =>
+        currentSize = currentSize + 1
+        if (doublyLinkedList.isEmpty) {
+          occupiedIndices.pushBackNode(hashedKeyNode)
+        }
+        doublyLinkedList.pushBack(Record(key, value, hashedKeyNode))
     }
-    get(key).map { existingValue: V =>
-      linkedList.remove((key, existingValue))
-    }
-    linkedList.add((key, value))
 
-    if (occupiedAtLeastOnceIndices.size.toDouble / lookupTable.length > loadFactor) resize()
+    if (currentSize.toDouble / lookupTable.length > loadFactor) resize()
 
     this
   }
 
   override def get(key: K): Option[V] = {
-    val hashedKey: Int = key.getHashValue(lookupTable.length)
-    val linkedList: LinkedList[(K, V)] = lookupTable(hashedKey)
-    val keyValuePairOpt: Option[(K, V)] = linkedList.findBy(_._1 == key)
-    val valueOpt: Option[V] = keyValuePairOpt.map(_._2)
+    val recordNodeOpt: Option[Node[Record[K, V]]] = getNode(key)
+    val valueOpt: Option[V] = recordNodeOpt.map(_.value.value)
 
     valueOpt
   }
 
-  override def remove(key: K): HashMap[K, V] = {
-    get(key).map { value: V =>
-      val hashedKey: Int = key.getHashValue(lookupTable.length)
-      val linkedList: LinkedList[(K, V)] = lookupTable(hashedKey)
+  private def getNode(key: K): Option[Node[Record[K, V]]] = {
+    val hashedKey: Int = key.getHashValue(lookupTable.length)
+    val doublyLinkedList: DoublyLinkedList[Record[K, V]] = lookupTable(hashedKey)
+    val recordNodeOpt: Option[Node[Record[K, V]]] = doublyLinkedList.findNodeBy(_.key == key)
 
-      linkedList.remove((key, value))
+    recordNodeOpt
+  }
+
+  override def remove(key: K): Option[V] = {
+    getNode(key).map { recordNode: Node[Record[K, V]] =>
+      currentSize = currentSize - 1
+      val hashedKeyNode: Node[Int] = recordNode.value.hashedKeyNode
+      val hashedKey: Int = hashedKeyNode.value
+      val doublyLinkedList: DoublyLinkedList[Record[K, V]] = lookupTable(hashedKey)
+      doublyLinkedList.removeNode(recordNode)
+      if (doublyLinkedList.isEmpty) {
+        occupiedIndices.removeNode(hashedKeyNode)
+      }
+
+      recordNode.value.value
     }
-
-    this
   }
 
   private def resize(): Unit = {
-    val currentOccupiedAtLeastOnceIndices: LinkedList[Int] = occupiedAtLeastOnceIndices
-    val newOccupiedAtLeastOnceIndices: LinkedList[Int] = new LinkedListImpl[Int]()
+    val currentOccupiedIndices: DoublyLinkedList[Int] = occupiedIndices
+    val newOccupiedIndices: DoublyLinkedList[Int] = new DoublyLinkedListImpl[Int]()
 
-    val currentLookupTable: Array[LinkedList[(K, V)]] = lookupTable
-    val newLookupTable: Array[LinkedList[(K, V)]] = Array.fill[LinkedList[(K, V)]](lookupTable.length * 2) {
-      new LinkedListImpl[(K, V)]()
-    }
+    val currentLookupTable: Array[DoublyLinkedList[Record[K, V]]] = lookupTable
+    val newLookupTable: Array[DoublyLinkedList[Record[K, V]]] =
+      Array.fill[DoublyLinkedList[Record[K, V]]](lookupTable.length * 2) {
+        new DoublyLinkedListImpl[Record[K, V]]()
+      }
     lookupTable = newLookupTable
 
-    currentOccupiedAtLeastOnceIndices.map { i: Int =>
-      val linkedList: LinkedList[(K, V)] = currentLookupTable(i)
-      linkedList.traverse { keyValuePair: (K, V) =>
-        val newHashedKey: Int = keyValuePair._1.getHashValue(lookupTable.length)
-        val newLinkedList: LinkedList[(K, V)] = newLookupTable(newHashedKey)
+    currentOccupiedIndices.map { i: Int =>
+      val doublyLinkedList: DoublyLinkedList[Record[K, V]] = currentLookupTable(i)
+      doublyLinkedList.traverse { record: Record[K, V] =>
+        val newHashedKey: Int = record.key.getHashValue(lookupTable.length)
+        val newHashedKeyNode: Node[Int] = Node(newHashedKey)
+        val newDoublyLinkedList: DoublyLinkedList[Record[K, V]] = newLookupTable(newHashedKey)
 
-        if (newLinkedList.isEmpty) {
-          newOccupiedAtLeastOnceIndices.add(newHashedKey)
+        if (newDoublyLinkedList.isEmpty) {
+          newOccupiedIndices.pushBackNode(newHashedKeyNode)
         }
-        newLinkedList.add(keyValuePair)
+        newDoublyLinkedList.pushBack(Record(record.key, record.value, newHashedKeyNode))
       }
     }
 
-    occupiedAtLeastOnceIndices = newOccupiedAtLeastOnceIndices
+    occupiedIndices = newOccupiedIndices
   }
+
+  override def size: Int = currentSize
 }
