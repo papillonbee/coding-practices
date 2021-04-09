@@ -17,10 +17,9 @@ class DoublyLinkedListTest extends AnyFunSpec
     val second: Dinosaur = Dinosaur(name = "Second", age = 23)
     val third: Dinosaur = Dinosaur(name = "Third", age = 8)
     val fourth: Dinosaur = Dinosaur(name = "Fourth", age = 15)
-    val fifth: Dinosaur = Dinosaur(name = "Fifth", age = 5)
 
     it("should add element to the front correctly") {
-      doublyLinkedList.pushFront(fifth)
+      doublyLinkedList.pushFront(fourth)
       doublyLinkedList.pushFront(third)
       val frontOpt: Option[Dinosaur] = doublyLinkedList.getFront
 
@@ -28,7 +27,7 @@ class DoublyLinkedListTest extends AnyFunSpec
     }
 
     it("should add element to the back correctly") {
-      doublyLinkedList.pushBack(fifth)
+      doublyLinkedList.pushBack(fourth)
       doublyLinkedList.pushBack(third)
       val backOpt: Option[Dinosaur] = doublyLinkedList.getBack
 
@@ -77,6 +76,63 @@ class DoublyLinkedListTest extends AnyFunSpec
 
       doublyLinkedList.getFront shouldBe empty
       doublyLinkedList.getBack shouldBe empty
+    }
+
+    it("should add node to the front correctly") {
+      val node: Node[Dinosaur] = Node(first)
+
+      doublyLinkedList.pushBack(second)
+      val addedNode: Node[Dinosaur] = doublyLinkedList.pushFrontNode(node)
+
+      val dinosaur: Dinosaur = addedNode.value
+      val previousDinosaur: Option[Dinosaur] = addedNode.getPreviousNode.map(_.value)
+      val nextDinosaur: Option[Dinosaur] = addedNode.getNextNode.map(_.value)
+
+      dinosaur shouldEqual first
+      previousDinosaur shouldBe empty
+      nextDinosaur.value shouldEqual second
+    }
+
+    it("should add node to the back correctly") {
+      val node: Node[Dinosaur] = Node(first)
+
+      doublyLinkedList.pushBack(second)
+      val addedNode: Node[Dinosaur] = doublyLinkedList.pushBackNode(node)
+
+      val dinosaur: Dinosaur = addedNode.value
+      val previousDinosaur: Option[Dinosaur] = addedNode.getPreviousNode.map(_.value)
+      val nextDinosaur: Option[Dinosaur] = addedNode.getNextNode.map(_.value)
+
+      dinosaur shouldEqual first
+      previousDinosaur.value shouldEqual second
+      nextDinosaur shouldBe empty
+    }
+
+    it("should remove node correctly") {
+      val node: Node[Dinosaur] = Node(second)
+      doublyLinkedList.pushBack(first)
+      doublyLinkedList.pushBackNode(node)
+      doublyLinkedList.pushBack(third)
+
+      val removedNodeOpt: Option[Node[Dinosaur]] = doublyLinkedList.removeNode(node)
+
+      removedNodeOpt.value shouldEqual node
+
+      val frontNode: Option[Node[Dinosaur]] = doublyLinkedList.getFrontNode
+      val nextNode: Option[Node[Dinosaur]] = frontNode.flatMap(_.getNextNode)
+      val nextNextNode: Option[Node[Dinosaur]] = nextNode.flatMap(_.getNextNode)
+
+      frontNode.map(_.value).value shouldEqual first
+      nextNode.map(_.value).value shouldEqual third
+      nextNextNode.map(_.value) shouldBe empty
+
+      val removedNonExistingNodeOpt: Option[Node[Dinosaur]] = doublyLinkedList.removeNode(Node(first))
+
+      removedNonExistingNodeOpt shouldBe empty
+
+      frontNode.map(_.value).value shouldEqual first
+      nextNode.map(_.value).value shouldEqual third
+      nextNextNode.map(_.value) shouldBe empty
     }
   }
 }
