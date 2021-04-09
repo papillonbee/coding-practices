@@ -29,7 +29,12 @@ trait DoublyLinkedList[T] {
   def popBack(): Option[T]
   def getFront: Option[T]
   def getBack: Option[T]
+
+  def findBy(f: T => Boolean): Option[T]
+  def findNodeBy(f: T => Boolean): Option[Node[T]]
+  def map[R](f: T => R): DoublyLinkedList[R]
   def traverse[A](f: T => A): Unit
+  def isEmpty: Boolean
   def size: Int
 
   def pushFrontNode(node: Node[T]): Node[T]
@@ -97,6 +102,35 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
 
   override def getBack: Option[T] = tail.map(_.value)
 
+  override def findBy(f: T => Boolean): Option[T] = findNodeBy(f).map(_.value)
+
+  override def findNodeBy(f: T => Boolean): Option[Node[T]] = head.flatMap(findNodeBy(f, _))
+
+  private def findNodeBy(f: T => Boolean, node: Node[T]): Option[Node[T]] = {
+    if (f(node.value)) {
+      Some(node)
+    } else {
+      node.getNextNode.flatMap(findNodeBy(f, _))
+    }
+  }
+
+  override def map[R](f: T => R): DoublyLinkedList[R] = {
+    val emptyDoublyLinkedList: DoublyLinkedList[R] = new DoublyLinkedListImpl[R]()
+
+    head.map(recursivelyMap(_, emptyDoublyLinkedList)(f)).getOrElse(emptyDoublyLinkedList)
+  }
+
+  @tailrec
+  private def recursivelyMap[R](node: Node[T], doublyLinkedList: DoublyLinkedList[R])(f: T => R): DoublyLinkedList[R] = {
+    doublyLinkedList.pushBack(f(node.value))
+    node.getNextNode match {
+      case Some(nextNode) =>
+        recursivelyMap(nextNode, doublyLinkedList)(f)
+      case _ =>
+        doublyLinkedList
+    }
+  }
+
   override def traverse[A](f: T => A): Unit = recursivelyTraverse(head)(f)
 
   @tailrec
@@ -108,6 +142,8 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
       case _ =>
     }
   }
+
+  override def isEmpty: Boolean = head.isEmpty && tail.isEmpty
 
   override def size: Int = currentSize
 
