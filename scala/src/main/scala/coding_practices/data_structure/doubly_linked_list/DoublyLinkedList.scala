@@ -138,10 +138,12 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
       case (Some(previousNode: Node[T]), Some(nextNode: Node[T]), _, _) =>
         previousNode.setNextNode(Some(nextNode))
         nextNode.setPreviousNode(Some(previousNode))
+        currentSize = currentSize - 1
         Some(node)
       case (None, Some(nextNode: Node[T]), Some(headNode: Node[T]), _) if headNode == node =>
         nextNode.setPreviousNode(None)
         head = Some(nextNode)
+        currentSize = currentSize - 1
         Some(node)
       case (Some(previousNode: Node[T]), None, _, Some(tailNode: Node[T])) if tailNode == node =>
         previousNode.setNextNode(None)
@@ -150,6 +152,7 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
       case (None, None, Some(headNode: Node[T]), Some(tailNode: Node[T])) if headNode == node && tailNode == node =>
         head = None
         tail = None
+        currentSize = currentSize - 1
         Some(node)
       case _ =>
         None
