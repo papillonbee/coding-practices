@@ -12,5 +12,6 @@ lazy val root = (project in file("."))
     name := serviceName,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
+      "org.scalatestplus" %% "scalatestplus-mockito" % "1.0.0-M2" % Test,
     )
   )
