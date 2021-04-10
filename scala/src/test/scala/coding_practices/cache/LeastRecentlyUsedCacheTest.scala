@@ -23,7 +23,7 @@ class LeastRecentlyUsedCacheTest extends AnyFunSpec
 
   describe("LeastRecentlyUsedMemoryCache") {
     val maximumSize: Int = 3
-    val lruCached: LeastRecentlyUsedCache[UUID, Dinosaur] =
+    val lruCache: LeastRecentlyUsedCache[UUID, Dinosaur] =
       new LeastRecentlyUsedCacheImpl[UUID, Dinosaur](maximumSize)
 
     val dinosaurService: DummyDinosaurService = mock[DummyDinosaurService]
@@ -35,9 +35,9 @@ class LeastRecentlyUsedCacheTest extends AnyFunSpec
         .age(22)
         .build
 
-      lruCached.put(dinosaurId, dinosaur)
+      lruCache.put(dinosaurId, dinosaur)
 
-      val cachedDinosaur: Option[Dinosaur] = lruCached.get(
+      val cachedDinosaur: Option[Dinosaur] = lruCache.get(
         dinosaurId, () => dinosaurService.fetchDinosaurById(dinosaurId)
       )
 
@@ -55,12 +55,55 @@ class LeastRecentlyUsedCacheTest extends AnyFunSpec
       val fetchedDinosaur: Option[Dinosaur] = Generator.option(dinosaur).build
       when(dinosaurService.fetchDinosaurById(dinosaurId)).thenReturn(fetchedDinosaur)
 
-      val cachedDinosaur: Option[Dinosaur] = lruCached.get(
+      val cachedDinosaur: Option[Dinosaur] = lruCache.get(
         dinosaurId, () => dinosaurService.fetchDinosaurById(dinosaurId)
       )
 
       cachedDinosaur shouldEqual fetchedDinosaur
       verify(dinosaurService, times(1)).fetchDinosaurById(dinosaurId)
+    }
+
+    it("should evict least recently used value when the configured maximum size is reached") {
+      val numberOfDinosaurs: Int = maximumSize + 1
+      val dinosaurIds: Seq[UUID] = Generator.uuid.buildList(numberOfDinosaurs)
+      val dinosaurs: Seq[Dinosaur] = DinosaurStubber.buildList(numberOfDinosaurs)
+
+      val dinosaurIdsZipWithDinosaursZipWithIndex: Seq[((UUID, Dinosaur), Int)] =
+        (dinosaurIds zip dinosaurs).zipWithIndex
+
+      dinosaurIdsZipWithDinosaursZipWithIndex foreach { case ((dinosaurId: UUID, dinosaur: Dinosaur), i: Int) =>
+        lruCache.put(dinosaurId, dinosaur)
+        when(dinosaurService.fetchDinosaurById(dinosaurId))
+          .thenReturn(Generator.option(dinosaur,  nonNullProbability = 1).build)
+
+        if (i == dinosaurIds.indices.last - 1) {
+          lruCache.get(dinosaurIds.head, () => dinosaurService.fetchDinosaurById(dinosaurIds.head))
+        }
+      }
+
+      val notEvictedFromCacheDinosaurs: Seq[((UUID, Dinosaur), Int)] =
+        dinosaurIdsZipWithDinosaursZipWithIndex.filterNot(_._2 == dinosaurIds.indices.head + 1)
+
+      notEvictedFromCacheDinosaurs foreach { case ((dinosaurId: UUID, dinosaur: Dinosaur), _: Int) =>
+        val cachedDinosaur: Option[Dinosaur] = lruCache.get(
+          dinosaurId, () => dinosaurService.fetchDinosaurById(dinosaurId)
+        )
+
+        cachedDinosaur.value shouldEqual dinosaur
+        verify(dinosaurService, never()).fetchDinosaurById(dinosaurId)
+      }
+
+      val evictedFromCacheDinosaur: Seq[((UUID, Dinosaur), Int)] =
+        dinosaurIdsZipWithDinosaursZipWithIndex.filter(_._2 == dinosaurIds.indices.head + 1)
+
+      evictedFromCacheDinosaur foreach { case ((dinosaurId: UUID, dinosaur: Dinosaur), _: Int) =>
+        val cachedDinosaur: Option[Dinosaur] = lruCache.get(
+          dinosaurId, () => dinosaurService.fetchDinosaurById(dinosaurId)
+        )
+
+        cachedDinosaur.value shouldEqual dinosaur
+        verify(dinosaurService, times(1)).fetchDinosaurById(dinosaurId)
+      }
     }
   }
 }
