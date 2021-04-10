@@ -1,5 +1,6 @@
 package coding_practices.generator
 
+import java.util.UUID
 import scala.util.Random
 
 trait Generator[T] {
@@ -23,5 +24,20 @@ object Generator {
 
   def alphanumeric: Generator[String] = new Generator[String] {
     override def build: String = Random.alphanumeric.take(10).mkString
+  }
+
+  def uuid: Generator[UUID] = new Generator[UUID] {
+    override def build: UUID = UUID.randomUUID()
+  }
+
+  def option[T](
+    generator: Generator[T],
+    nonNullProbability: Double = 0.5,
+  ): Generator[Option[T]] = new Generator[Option[T]] {
+    override def build: Option[T] = if (Random.nextDouble() < nonNullProbability) Some(generator.build) else None
+  }
+
+  implicit def toGenerator[T](t: T): Generator[T] = new Generator[T] {
+    override def build: T = t
   }
 }
