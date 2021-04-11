@@ -2,12 +2,11 @@ package coding_practices.data_structure.binary_heap
 
 import coding_practices.model.Dinosaur
 import coding_practices.model.stubber.DinosaurStubber
-import org.scalatest.{OneInstancePerTest, OptionValues}
+import org.scalatest.OptionValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 
 class BinaryHeapTest extends AnyFunSpec
-  with OneInstancePerTest
   with Matchers
   with OptionValues {
 
@@ -42,6 +41,17 @@ class BinaryHeapTest extends AnyFunSpec
         val poppedDinosaur: Option[Dinosaur] = binaryHeap.pop()
         poppedDinosaur.value shouldEqual dinosaur
       }
+    }
+
+    it("should be idempotent when no elements are left to pop") {
+      val dinosaurs: Seq[Dinosaur] = DinosaurStubber.buildList(10)
+
+      val binaryHeap: BinaryHeap[Dinosaur] = new BinaryHeapImpl[Dinosaur](dinosaurs: _*)
+
+      dinosaurs.foreach(_ => binaryHeap.pop())
+      val poppedDinosaurs: Seq[Dinosaur] = dinosaurs.flatMap(_ => binaryHeap.pop())
+
+      poppedDinosaurs shouldBe empty
     }
   }
 }

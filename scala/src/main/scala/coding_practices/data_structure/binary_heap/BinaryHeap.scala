@@ -2,6 +2,8 @@ package coding_practices.data_structure.binary_heap
 
 import coding_practices.data_structure.hash_map.{HashMap, HashMapImpl}
 
+import scala.annotation.tailrec
+
 case class Node[T](
   value: T,
   var index: Int,
@@ -15,6 +17,7 @@ trait BinaryHeap[T] {
   def push(value: T): T
   def pop(): Option[T]
   def peek: Option[T]
+  def size: Int
 }
 
 class BinaryHeapImpl[T](values: T*)(
@@ -72,6 +75,8 @@ class BinaryHeapImpl[T](values: T*)(
 
   override def peek: Option[T] = memoryTable.get(0).map(_.value)
 
+  override def size: Int = lastIndex.map(_ + 1).getOrElse(0)
+
   private def incrementIndex(): Unit = {
     val incrementedIndex: Option[Int] = lastIndex match {
       case Some(index: Int) => Some(index + 1)
@@ -97,9 +102,7 @@ class BinaryHeapImpl[T](values: T*)(
 
     getLastInternalNodeIndex match {
       case Some(lastInternalNodeIndex: Int) =>
-        (lastInternalNodeIndex to 0 by -1).foreach { index: Int =>
-          heapifyDown(index)
-        }
+        (lastInternalNodeIndex to 0 by -1).foreach(heapifyDown)
       case _ =>
     }
   }
@@ -113,6 +116,7 @@ class BinaryHeapImpl[T](values: T*)(
     }
   }
 
+  @tailrec
   private def heapifyUp(index: Int): Unit = {
     val nodeOpt: Option[Node[T]] = memoryTable.get(index)
     val parentNodeOpt: Option[Node[T]] = nodeOpt.map(_.getParentIndex).flatMap(memoryTable.get)
@@ -137,6 +141,7 @@ class BinaryHeapImpl[T](values: T*)(
     }
   }
 
+  @tailrec
   private def heapifyDown(index: Int): Unit = {
     val nodeOpt: Option[Node[T]] = memoryTable.get(index)
     val leftChildNodeOpt: Option[Node[T]] = nodeOpt.map(_.getLeftChildIndex).flatMap(memoryTable.get)
