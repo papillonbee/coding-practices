@@ -37,6 +37,8 @@ object Generator {
     override def build: Option[T] = if (Random.nextDouble() < nonNullProbability) Some(generator.build) else None
   }
 
+  def choose[T](values: T*): T = Random.shuffle(values).head
+
   implicit def toGenerator[T](t: T): Generator[T] = new Generator[T] {
     override def build: T = t
   }
