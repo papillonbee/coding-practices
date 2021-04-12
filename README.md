@@ -12,6 +12,8 @@ this repository includes implementations of data structures and algorithms from 
   * each cell in the lookup table is filled with a doubly linked list, allowing O(k) insertion and O(1) deletion where k is the number of collisions for the same hashed key
 * binary heap
   * use hash map as a lookup table instead of array, allowing dynamically scaled lookup table size
+* disjoint set
+  * with path compression and union by rank
 
 ## algorithm
 * merge sort
