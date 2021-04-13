@@ -5,15 +5,18 @@ this repository includes implementations of data structures and algorithms from 
 ## data structure
 * linked list
 * doubly linked list
-  * with O(1) deletion when the address of the value is known
+  * with O(1) time complexity deletion when the address of the value is known
 * binary tree
 * hash map
   * automatically double the lookup table size when occupancy exceeds a loading factor of 0.7
-  * each cell in the lookup table is filled with a doubly linked list, allowing O(k) insertion and O(1) deletion where k is the number of collisions for the same hashed key
+  * each cell in the lookup table is filled with a doubly linked list, allowing O(k) time complexity insertion and O(1) time complexity deletion where k is the number of collisions for the same hashed key
 * binary heap
   * use hash map as a lookup table instead of array, allowing dynamically scaled lookup table size
 * disjoint set
   * with path compression and union by rank
+* segment tree
+  * get range sum or range min in O(log(n)) time complexity and update value in O(log(n)) time complexity in integer array where n is the array size
+  * segment tree is constructed in 2n-1 time complexity
 
 ## algorithm
 * merge sort
@@ -22,6 +25,6 @@ this repository includes implementations of data structures and algorithms from 
 * least recently used cache
   * use doubly linked list to store the key value pair
   * use hash map to store the key and the address of the key value pair in doubly linked list
-  * with above, allowing O(1) update of appending the most recently used to the tail of doubly linked list
-  * whenever the cache has cached elements exceeding the configured limit, popping the least recently used element in O(1)
+  * with above, allowing updating the most recently used element in O(1) time complexity by appending the element to the tail of doubly linked list
+  * whenever the cache has cached elements exceeding the configured limit, evicting the least recently used element in O(1) time complexity by popping the element in the front of doubly linked list
   
