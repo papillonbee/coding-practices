@@ -165,4 +165,3 @@ class BinaryTreeImpl[T]()(
     }
   }
 }
-

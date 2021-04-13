@@ -33,6 +33,7 @@ trait DoublyLinkedList[T] {
   def findBy(f: T => Boolean): Option[T]
   def findNodeBy(f: T => Boolean): Option[Node[T]]
   def map[R](f: T => R): DoublyLinkedList[R]
+  def flatMap[R](f: T => DoublyLinkedList[R]): DoublyLinkedList[R]
   def traverse[A](f: T => A): Unit
   def isEmpty: Boolean
   def size: Int
@@ -42,6 +43,8 @@ trait DoublyLinkedList[T] {
   def removeNode(node: Node[T]): Option[Node[T]]
   def getFrontNode: Option[Node[T]]
   def getBackNode: Option[Node[T]]
+
+  def toList: List[T]
 }
 
 class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
@@ -131,6 +134,29 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
     }
   }
 
+  override def flatMap[R](f: T => DoublyLinkedList[R]): DoublyLinkedList[R] = {
+    val emptyDoublyLinkedList: DoublyLinkedList[R] = new DoublyLinkedListImpl[R]()
+
+    head.map(recursivelyFlatMap(_, emptyDoublyLinkedList)(f)).getOrElse(emptyDoublyLinkedList)
+  }
+
+  @tailrec
+  private def recursivelyFlatMap[R](
+    node: Node[T],
+    doublyLinkedList: DoublyLinkedList[R],
+  )(f: T => DoublyLinkedList[R]): DoublyLinkedList[R] = {
+    val innerDoublyLinkedList: DoublyLinkedList[R] = f(node.value)
+    innerDoublyLinkedList.traverse { value: R =>
+      doublyLinkedList.pushBack(value)
+    }
+    node.getNextNode match {
+      case Some(nextNode) =>
+        recursivelyFlatMap(nextNode, doublyLinkedList)(f)
+      case _ =>
+        doublyLinkedList
+    }
+  }
+
   override def traverse[A](f: T => A): Unit = recursivelyTraverse(head)(f)
 
   @tailrec
@@ -199,4 +225,16 @@ class DoublyLinkedListImpl[T] extends DoublyLinkedList[T] {
   override def getFrontNode: Option[Node[T]] = head
 
   override def getBackNode: Option[Node[T]] = tail
+
+  override def toList: List[T] = recursivelyMapToList(head, List.empty)
+
+  @tailrec
+  private def recursivelyMapToList(nodeOpt: Option[Node[T]], list: List[T]): List[T] = {
+    nodeOpt match {
+      case Some(node: Node[T]) =>
+        recursivelyMapToList(node.getNextNode,  list :+ node.value)
+      case _ =>
+        list
+    }
+  }
 }

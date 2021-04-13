@@ -19,6 +19,7 @@ trait HashMap[K, V] {
   def get(key: K): Option[V]
   def remove(key: K): Option[V]
   def size: Int
+  def toList: List[(K, V)]
 }
 
 class HashMapImpl[K, V]() extends HashMap[K, V] {
@@ -113,4 +114,12 @@ class HashMapImpl[K, V]() extends HashMap[K, V] {
   }
 
   override def size: Int = currentSize
+
+  override def toList: List[(K, V)] = {
+    occupiedIndices.flatMap { occupiedIndex: Int =>
+      lookupTable(occupiedIndex).map { record: Record[K, V] =>
+        (record.key, record.value)
+      }
+    }.toList
+  }
 }
