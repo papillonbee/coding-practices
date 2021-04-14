@@ -20,6 +20,8 @@ this repository includes implementations of data structures and algorithms from 
 
 ## algorithm
 * merge sort
+* egg drop problem
+  * solve for the minimum number of experiments required for determining the pivotal floor, with both bottom up and top down approach
 
 ## cache
 * least recently used cache

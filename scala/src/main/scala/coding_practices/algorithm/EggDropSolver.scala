@@ -7,15 +7,26 @@ package coding_practices.algorithm
  *  , 0, 1, 2, 3, 4, 5, 6
  *  0 -, -, -, -, -, -, -
  *  1 0, 1, 2, 3, 4, 5, 6
- *  2 0, 1, .,
- *  3 0, 1,
+ *  2 0, 1, x, y,
+ *  3 0, 1, z,
  *  4 0, 1,
  *  5 0, 1,
  *  6 0, 1,
  *
- *  . = min(
+ *  x = min(
  *        1 + max(table[2][1], table[1][0]),
  *        1 + max(table[2][0], table[1][1])
+ *      ) = 2
+ *
+ *  y = min(
+ *        1 + max(table[2][2], table[1][0]),
+ *        1 + max(table[2][1], table[1][1]),
+ *        1 + max(table[2][0], table[1][2])
+ *      ) = 2
+ *
+ *  z = min(
+ *        1 + max(table[3][1], table[2][0]),
+ *        1 + max(table[3][0], table[2][1])
  *      ) = 2
  */
 
