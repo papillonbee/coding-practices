@@ -22,6 +22,9 @@ this repository includes implementations of data structures and algorithms from 
 * merge sort
 * egg drop problem
   * solve for the minimum number of experiments required for determining the pivotal floor, with both bottom up and top down approach
+* dijkstra algorithm
+  * solve for a path from source to any given vertex with the shortest distance, restricted to problems where distance between any vertices is non-negative 
+  * implement with priority queue where we give priority to the shortest distance from source to the given vertex, allowing O(E * log(V)) build time where E is the number of edges and V is the number of vertices
 
 ## cache
 * least recently used cache
