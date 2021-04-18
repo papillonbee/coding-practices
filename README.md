@@ -33,3 +33,7 @@ this repository includes implementations of data structures and algorithms from 
   * with above, allowing updating the most recently used element in O(1) time complexity by appending the element to the tail of doubly linked list
   * whenever the cache has cached elements exceeding the configured limit, evicting the least recently used element in O(1) time complexity by popping the element in the front of doubly linked list
   
+## cipher
+* aes
+  * expose only encrypt/decrypt method for arbitrary string
+  * the parameters for building the cipher is made configurable from application.conf
